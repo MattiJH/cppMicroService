@@ -1,0 +1,75 @@
+#include "dao.hpp"
+#include <SQLiteCpp\SQLiteCpp.h>
+#include <iostream>
+
+
+int Dao::determineID() {
+	SQLite::Database db("testDB.db");
+	SQLite::Statement query(db, "Select Location_id FROM Location ORDER BY Location_id ASC");
+
+	int id = NULL;
+	while (query.executeStep()) {
+		if (id + 1 == (int)query.getColumn(0)) {
+			id = query.getColumn(0);
+		}
+		else {
+			break;
+		}
+	}
+	return id + 1;
+}
+bool Dao::insertIntoDB(Location& add) {
+	bool success = true;
+	try
+	{
+		SQLite::Database db("testDB.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+
+		add.id = determineID();
+		SQLite::Transaction transaction(db);
+		std::string query = "INSERT INTO Location(Location_id, Location_name, Street_address, City, Zip, Country) VALUES(";
+		query += add.getValues();
+		query += ")";
+		std::cout << query << std::endl;
+		db.exec(query);
+		transaction.commit();
+	}
+	catch (std::exception& e)
+	{
+		success = false;
+		std::cout << "exception: " << e.what() << std::endl;
+	}
+	return success;
+}
+
+std::vector<Location> Dao::getAllFromDB() {
+	std::vector<Location> results;
+	try
+	{
+		
+		SQLite::Database db("testDB.db");
+
+		SQLite::Statement query(db, "SELECT * FROM Location");
+
+		while (query.executeStep()) {
+			Location add;
+			add.id = query.getColumn(0);
+			const char* name = query.getColumn(1);
+			add.name = name;
+			const char* address = query.getColumn(2);
+			add.address = address;
+			const char* city = query.getColumn(3);
+			add.city = city;
+			add.zip = query.getColumn(4);
+			const char* country = query.getColumn(5);
+			add.country = country;
+			
+			results.push_back(add);
+		}
+		
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "exception: " << e.what() << std::endl;
+	}
+	return results;
+}
