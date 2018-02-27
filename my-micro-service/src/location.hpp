@@ -11,6 +11,6 @@ struct Location {
 	std::string country;
 
 	std::string getValues();
-	
+
 
 };

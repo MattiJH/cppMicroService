@@ -138,6 +138,47 @@ void MicroserviceController::handlePost(http_request message) {
 			});
 
 		}
+		if (path[0] == U("locations") && path[1] == U("update"))
+		{
+			message.extract_json().then([=](json::value request) {
+				try
+				{
+					Location updateLocation;
+
+					updateLocation.id = request[U("Location_id")].as_integer();
+					updateLocation.name = toString(request[U("Location_name")].as_string().c_str());
+					updateLocation.address = toString(request[U("Location_address")].as_string().c_str());
+					updateLocation.city = toString(request[U("Location_city")].as_string().c_str());
+					updateLocation.zip = request[U("Location_zip")].as_integer();
+					updateLocation.country = toString(request[U("Location_country")].as_string().c_str());
+
+					if (dao.updateDB(updateLocation)) {
+						message.reply(status_codes::OK);
+					}
+					else
+					{
+						message.reply(status_codes::InternalError);
+					}
+				}
+				catch (const json::json_exception & e)
+				{
+					std::cout << "exception: " << e.what() << std::endl;
+					auto response = json::value::object();
+					response[U("error")] = json::value::string(U("Invalid JSON"));
+					message.reply(status_codes::BadRequest, response);
+				}
+				catch (const std::exception ex)
+				{
+					message.reply(status_codes::BadRequest);
+				}
+				catch (...)
+				{
+					message.reply(status_codes::BadRequest);
+				}
+
+			});
+
+		}
 	}
 	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::POST));
 }

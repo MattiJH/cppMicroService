@@ -40,6 +40,34 @@ bool Dao::insertIntoDB(Location& add) {
 	}
 	return success;
 }
+	bool Dao::updateDB(Location& update) {
+		bool success = true;
+		try
+		{
+			SQLite::Database db("testDB.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+
+			
+			SQLite::Transaction transaction(db);
+			std::string query = "UPDATE Location SET ";
+			query += "Location_name = \"" + update.name +'"';
+			query += ",Street_address = \"" + update.address + '"';
+			query += ",City = \"" + update.city + '"'; 
+			query += ", Zip = " + std::to_string(update.zip); 
+			query += ",Country = \"" + update.country + '"';
+			query += "WHERE Location_id = " + std::to_string(update.id);
+		
+			std::cout << query << std::endl;
+			db.exec(query);
+			transaction.commit();
+		}
+		catch (std::exception& e)
+		{
+			success = false;
+			std::cout << "exception: " << e.what() << std::endl;
+		}
+		return success;
+	}
+
 
 std::vector<Location> Dao::getAllFromDB() {
 	std::vector<Location> results;
