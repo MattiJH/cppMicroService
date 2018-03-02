@@ -58,6 +58,7 @@ int main(int argc, const char * argv[]) {
 		std::cerr << "something wrong happened! :(" << std::endl;
 		std::cerr << e.what() << std::endl;
 	}
+
 	catch (...) {
 		//RuntimeUtils::printStackTrace();
 		// TODO: use boost strack trace helper here

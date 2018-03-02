@@ -31,7 +31,8 @@
 using namespace web;
 using namespace http;
 
-void MicroserviceController::initRestOpHandlers() {
+void MicroserviceController::initRestOpHandlers() 
+{
 	_listener.support(methods::GET, std::bind(&MicroserviceController::handleGet, this, std::placeholders::_1));
 	_listener.support(methods::PUT, std::bind(&MicroserviceController::handlePut, this, std::placeholders::_1));
 	_listener.support(methods::POST, std::bind(&MicroserviceController::handlePost, this, std::placeholders::_1));
@@ -42,7 +43,8 @@ void MicroserviceController::initRestOpHandlers() {
 void MicroserviceController::handleGet(http_request message) 
 {
 	auto path = requestPath(message);
-	if (!path.empty()) {
+	if (!path.empty()) 
+	{
 		if (path[0] == U("service") && path[1] == U("test")) 
 		{
 			auto response = json::value::object();
@@ -58,8 +60,8 @@ void MicroserviceController::handleGet(http_request message)
 			json::value response;
 			int i = 0;
 			
-			for (Location& l : responseVec) {
-				
+			for (Location& l : responseVec) 
+			{
 				auto responsePart = json::value::object();
 				responsePart[U("Location_id")] = json::value::number(l.id);
 				responsePart[U("Location_name")] = json::value::string(utility::conversions::to_string_t(l.name));
@@ -76,7 +78,9 @@ void MicroserviceController::handleGet(http_request message)
 
 
 		}
-		else {
+		
+		else 
+		{
 			message.reply(status_codes::NotFound);
 		}
 	}
@@ -85,79 +89,122 @@ void MicroserviceController::handleGet(http_request message)
 		message.reply(status_codes::NotFound);
 	}
 }
-void MicroserviceController::handlePatch(http_request message) {
+void MicroserviceController::handlePatch(http_request message) 
+{
 	message.reply(status_codes::NotImplemented, responseNotImpl(methods::PATCH));
 }
 
-void MicroserviceController::handlePut(http_request message) {
+void MicroserviceController::handlePut(http_request message) 
+{
 
 	message.reply(status_codes::NotImplemented, responseNotImpl(methods::PUT));
 }
 
-void MicroserviceController::handlePost(http_request message) {
+void MicroserviceController::handlePost(http_request message) 
+{
+	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::POST));
 	auto path = requestPath(message);
 	if (!path.empty())
 	{
 		if (path[0] == U("locations") && path[1] == U("add"))
 		{
-			message.extract_json().then([=](json::value request) {
-				try
+			
+				message.extract_json().then([=](json::value request)
 				{
-					Location newLocation;
-
-					newLocation.name = toString(request[U("Location_name")].as_string().c_str());
-					newLocation.address = toString(request[U("Location_address")].as_string().c_str());
-					newLocation.city = toString(request[U("Location_city")].as_string().c_str());
-					newLocation.zip = request[U("Location_zip")].as_integer();
-					newLocation.country = toString(request[U("Location_country")].as_string().c_str());
-
-					if (dao.insertIntoDB(newLocation)) {
-						message.reply(status_codes::OK);
-					}
-					else
+					try
 					{
-						message.reply(status_codes::InternalError);
+						Location newLocation;
+
+						if (request.has_field(U("Location_name")))
+							newLocation.name = toString(request[U("Location_name")].as_string().c_str());
+
+						if (request.has_field(U("Location_address")))
+							newLocation.address = toString(request[U("Location_address")].as_string().c_str());
+
+						if (request.has_field(U("Location_city")))
+							newLocation.city = toString(request[U("Location_city")].as_string().c_str());
+
+						if (request.has_field(U("Location_zip")))
+							newLocation.zip = request[U("Location_zip")].as_integer();
+
+						if (request.has_field(U("Location_country")))
+							newLocation.country = toString(request[U("Location_country")].as_string().c_str());
+
+						if (dao.insertIntoDB(newLocation)) {
+							auto response = json::value::object();
+							response[U("Success")] = json::value::string(U("Adding item successful"));
+							message.reply(status_codes::OK,response);
+						}
+						else
+						{
+							auto response = json::value::object();
+							response[U("Fail")] = json::value::string(U("Addint item failed, please check your parameters"));
+							message.reply(status_codes::InternalError);
+						}
 					}
-				}
-				catch (const json::json_exception & e)
-				{
-					std::cout << "exception: " << e.what() << std::endl;
-					auto response = json::value::object();
-					response[U("error")] = json::value::string(U("Invalid JSON"));
-					message.reply(status_codes::BadRequest, response);
-				}
-				catch (const std::exception ex)
-				{
-					message.reply(status_codes::BadRequest);
-				}
-				catch (...)
-				{
-					message.reply(status_codes::BadRequest);
-				}
+					catch (const json::json_exception & e)
+					{
+						std::cout << "exception: " << e.what() << std::endl;
+						auto response = json::value::object();
+						response[U("error")] = json::value::string(U("Invalid JSON"));
+						message.reply(status_codes::BadRequest, response);
+					}
+					catch (const std::exception ex)
+					{
+						message.reply(status_codes::BadRequest);
+					}
+					catch (...)
+					{
+						message.reply(status_codes::BadRequest);
+					}
 
-			});
-
+				});
+			
+		
 		}
-		if (path[0] == U("locations") && path[1] == U("update"))
+		else if (path[0] == U("locations") && path[1] == U("update"))
 		{
 			message.extract_json().then([=](json::value request) {
 				try
 				{
 					Location updateLocation;
+					if (request.has_field(U("Location_id"))) {
+						updateLocation.id = request[U("Location_id")].as_integer();
 
-					updateLocation.id = request[U("Location_id")].as_integer();
-					updateLocation.name = toString(request[U("Location_name")].as_string().c_str());
-					updateLocation.address = toString(request[U("Location_address")].as_string().c_str());
-					updateLocation.city = toString(request[U("Location_city")].as_string().c_str());
-					updateLocation.zip = request[U("Location_zip")].as_integer();
-					updateLocation.country = toString(request[U("Location_country")].as_string().c_str());
 
-					if (dao.updateDB(updateLocation)) {
-						message.reply(status_codes::OK);
+						if (request.has_field(U("Location_name")))
+							updateLocation.name = toString(request[U("Location_name")].as_string().c_str());
+
+						if (request.has_field(U("Location_address")))
+							updateLocation.address = toString(request[U("Location_address")].as_string().c_str());
+
+						if (request.has_field(U("Location_city")))
+							updateLocation.city = toString(request[U("Location_city")].as_string().c_str());
+
+						if (request.has_field(U("Location_zip")))
+							updateLocation.zip = request[U("Location_zip")].as_integer();
+
+						if (request.has_field(U("Location_country")))
+							updateLocation.country = toString(request[U("Location_country")].as_string().c_str());
+
+						if (dao.updateDB(updateLocation)) {
+							auto response = json::value::object();
+							response[U("Success")] = json::value::string(U("Update successful"));
+							message.reply(status_codes::OK, response);
+						}
+						else
+						{
+							auto response = json::value::object();
+							response[U("Fail")] = json::value::string(U("Update successful"));
+							message.reply(status_codes::InternalError);
+						}
 					}
 					else
 					{
-						message.reply(status_codes::InternalError);
+
+						auto response = json::value::object();
+						response[U("error")] = json::value::string(U("Update failed, please check your parameters"));
+						message.reply(status_codes::BadRequest, response);
 					}
 				}
 				catch (const json::json_exception & e)
@@ -179,12 +226,179 @@ void MicroserviceController::handlePost(http_request message) {
 			});
 
 		}
+		else if (path[0] == U("locations") && path[1] == U("search")) {
+
+			
+			
+			auto searchDB = message.extract_json().then([=](json::value request)
+			{
+				try
+				{
+					Location searchLocation;
+					if (request.has_field(U("Location_id")))
+						searchLocation.id = request[U("Location_id")].as_integer();
+
+					if (request.has_field(U("Location_name")))
+						searchLocation.name = toString(request[U("Location_name")].as_string().c_str());
+
+					if (request.has_field(U("Location_address")))
+						searchLocation.address = toString(request[U("Location_address")].as_string().c_str());
+
+					if (request.has_field(U("Location_city")))
+						searchLocation.city = toString(request[U("Location_city")].as_string().c_str());
+
+					if (request.has_field(U("Location_zip")))
+						searchLocation.zip = request[U("Location_zip")].as_integer();
+
+					if (request.has_field(U("Location_country")))
+						searchLocation.country = toString(request[U("Location_country")].as_string().c_str());
+
+					std::vector<Location> responseVec = dao.getByValue(searchLocation);
+					json::value response;
+					int i = 0;
+
+					for (Location& l : responseVec)
+					{
+						auto responsePart = json::value::object();
+						responsePart[U("Location_id")] = json::value::number(l.id);
+						responsePart[U("Location_name")] = json::value::string(utility::conversions::to_string_t(l.name));
+						responsePart[U("Location_address")] = json::value::string(utility::conversions::to_string_t(l.address));
+						responsePart[U("Location_city")] = json::value::string(utility::conversions::to_string_t(l.city));
+						responsePart[U("Location_zip")] = json::value::number(l.zip);
+						responsePart[U("Location_country")] = json::value::string(utility::conversions::to_string_t(l.country));
+
+						response[i] = responsePart;
+						i++;
+					}
+					message.reply(status_codes::OK, response);
+
+				}
+				catch (const json::json_exception & e)
+				{
+					std::cout << "exception: " << e.what() << std::endl;
+					auto response = json::value::object();
+					response[U("error")] = json::value::string(U("Invalid JSON"));
+					message.reply(status_codes::BadRequest, response);
+				}
+				catch (const std::exception ex)
+				{
+					message.reply(status_codes::BadRequest);
+				}
+				catch (...)
+				{
+					message.reply(status_codes::BadRequest);
+				}
+
+			});
+			try 
+			{
+				searchDB.get();
+			}
+			catch (std::exception & e)
+			{
+				std::cout << e.what() << std::endl;
+			}
+		
+		}
 	}
-	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::POST));
+	else
+	{
+		message.reply(status_codes::NotFound);
+	}
+
 }
 
 void MicroserviceController::handleDelete(http_request message) {
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::DEL));
+	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::DEL));
+	auto path = requestPath(message);
+	if (!path.empty())
+	{
+		if (path[0] == U("locations") && path[1] == U("delete")) 
+		{
+			auto deleteRow =  message.extract_json().then([=](json::value request) {
+				try
+				{
+				
+					Location deleteLocation;
+
+					if (request.has_field(U("Location_id"))) {
+						deleteLocation.id = request[U("Location_id")].as_integer();
+
+
+						if (request.has_field(U("Location_name")))
+							deleteLocation.name = toString(request[U("Location_name")].as_string().c_str());
+
+
+						if (request.has_field(U("Location_address")))
+							deleteLocation.address = toString(request[U("Location_address")].as_string().c_str());
+
+						if (request.has_field(U("Location_city")))
+							deleteLocation.city = toString(request[U("Location_city")].as_string().c_str());
+
+						if (request.has_field(U("Location_zip")))
+							deleteLocation.zip = request[U("Location_zip")].as_integer();
+
+						if (request.has_field(U("Location_country")))
+							deleteLocation.country = toString(request[U("Location_country")].as_string().c_str());
+
+						if (dao.deleteRow(deleteLocation))
+						{
+							auto response = json::value::object();
+							response[U("Success")] = json::value::string(U("Deletion successful"));
+							message.reply(status_codes::OK,response);
+						}
+						else
+						{
+							auto response = json::value::object();
+							response[U("Fail")] = json::value::string(U("Deletion failed, please check your parameters"));
+							message.reply(status_codes::OK, response);
+						}
+					}
+					else
+					{
+						auto response = json::value::object();
+						response[U("error")] = json::value::string(U("Invalid JSON"));
+						message.reply(status_codes::BadRequest, response);
+
+					}
+				}
+				catch (const json::json_exception & e)
+				{
+					std::cout << "exception: " << e.what() << std::endl;
+					auto response = json::value::object();
+					response[U("error")] = json::value::string(U("Invalid JSON"));
+					message.reply(status_codes::BadRequest, response);
+				}
+				catch (const std::exception ex)
+				{
+					message.reply(status_codes::BadRequest);
+				}
+				catch (...)
+				{
+					message.reply(status_codes::BadRequest);
+				}
+
+			});
+			try 
+			{
+				deleteRow.get();
+			}
+			catch (std::exception & e) 
+			{
+				std::cout << "exception: " << e.what() << std::endl;
+				
+			}
+		}
+		else
+		{
+			message.reply(status_codes::NotFound);
+		}
+	}
+	else
+	{
+		message.reply(status_codes::NotFound);
+	}
+	
 }
 
 void MicroserviceController::handleHead(http_request message) {

@@ -3,6 +3,8 @@
 #include<string>
 #include <codecvt>
 struct Location {
+
+	Location();
 	int id;
 	std::string name;
 	std::string address;
@@ -10,7 +12,7 @@ struct Location {
 	int zip;
 	std::string country;
 
-	std::string getValues();
-
+	std::string getInsertValues();
+	std::string getSearchValue();
 
 };
