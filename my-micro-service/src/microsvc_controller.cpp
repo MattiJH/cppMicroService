@@ -47,33 +47,44 @@ void MicroserviceController::handleGet(http_request message)
 	{
 		if (path[0] == U("service") && path[1] == U("test")) 
 		{
-			auto response = json::value::object();
-			response[U("version")] = json::value::string(U("0.1.1"));
-			response[U("status")] = json::value::string(U("ready!"));
-			response[U("response")] = json::value::string(U("Hello World!"));
-			message.reply(status_codes::OK, response);
+			auto responseBody = json::value::object();
+			responseBody[U("version")] = json::value::string(U("0.1.1"));
+			responseBody[U("status")] = json::value::string(U("ready!"));
+			responseBody[U("response")] = json::value::string(U("Hello World!"));
+
+			http_response response(status_codes::OK);
+			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+			response.set_body(responseBody);
+
+			message.reply(response);
 
 		}
 		else if (path[0] == U("locations") && path[1] == U("all")) 
 		{
 			std::vector<Location> responseVec = dao.getAllFromDB();
-			json::value response;
+			json::value responseBody;
+			
 			int i = 0;
 			
 			for (Location& l : responseVec) 
 			{
-				auto responsePart = json::value::object();
-				responsePart[U("Location_id")] = json::value::number(l.id);
-				responsePart[U("Location_name")] = json::value::string(utility::conversions::to_string_t(l.name));
-				responsePart[U("Location_address")] = json::value::string(utility::conversions::to_string_t(l.address));
-				responsePart[U("Location_city")] = json::value::string(utility::conversions::to_string_t(l.city));
-				responsePart[U("Location_zip")] = json::value::number(l.zip);
-				responsePart[U("Location_country")] = json::value::string(utility::conversions::to_string_t(l.country));
+				auto responseBodyPart = json::value::object();
+				responseBodyPart[U("Location_id")] = json::value::number(l.id);
+				responseBodyPart[U("Location_name")] = json::value::string(utility::conversions::to_string_t(l.name));
+				responseBodyPart[U("Location_address")] = json::value::string(utility::conversions::to_string_t(l.address));
+				responseBodyPart[U("Location_city")] = json::value::string(utility::conversions::to_string_t(l.city));
+				responseBodyPart[U("Location_zip")] = json::value::number(l.zip);
+				responseBodyPart[U("Location_country")] = json::value::string(utility::conversions::to_string_t(l.country));
 
-				response[i] = responsePart;
+				responseBody[i] = responseBodyPart;
 				i++;
 			}
-			message.reply(status_codes::OK, response);
+
+			http_response response(status_codes::OK);
+			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+			response.set_body(responseBody);
+
+			message.reply(response);
 
 
 
@@ -81,23 +92,36 @@ void MicroserviceController::handleGet(http_request message)
 		
 		else 
 		{
-			message.reply(status_codes::NotFound);
+			http_response response(status_codes::NotFound);
+			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+
+			message.reply(response);
 		}
 	}
 	else 
 	{
-		message.reply(status_codes::NotFound);
+		http_response response(status_codes::NotFound);
+		response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	
+		message.reply(response);
+	
 	}
 }
 void MicroserviceController::handlePatch(http_request message) 
 {
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::PATCH));
+	http_response response(status_codes::NotImplemented);
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.set_body(responseNotImpl(methods::PATCH));
+	message.reply(response);
 }
 
 void MicroserviceController::handlePut(http_request message) 
 {
 
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::PUT));
+	http_response response(status_codes::NotImplemented);
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.set_body(responseNotImpl(methods::PUT));
+	message.reply(response);
 }
 
 void MicroserviceController::handlePost(http_request message) 
@@ -131,31 +155,53 @@ void MicroserviceController::handlePost(http_request message)
 							newLocation.country = toString(request[U("Location_country")].as_string().c_str());
 
 						if (dao.insertIntoDB(newLocation)) {
-							auto response = json::value::object();
-							response[U("Success")] = json::value::string(U("Adding item successful"));
-							message.reply(status_codes::OK,response);
+
+							auto responseBody = json::value::object();
+							responseBody[U("Success")] = json::value::string(U("Adding item successful"));
+
+							http_response response(status_codes::OK);
+							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							response.set_body(responseBody);
+
+							message.reply(response);
+						
 						}
 						else
 						{
-							auto response = json::value::object();
-							response[U("Fail")] = json::value::string(U("Addint item failed, please check your parameters"));
-							message.reply(status_codes::InternalError);
+							auto responseBody = json::value::object();
+							responseBody[U("Fail")] = json::value::string(U("Addint item failed, please check your parameters"));
+
+							http_response response(status_codes::OK);
+							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							response.set_body(responseBody);
+
+							message.reply(response);
 						}
 					}
 					catch (const json::json_exception & e)
 					{
 						std::cout << "exception: " << e.what() << std::endl;
-						auto response = json::value::object();
-						response[U("error")] = json::value::string(U("Invalid JSON"));
-						message.reply(status_codes::BadRequest, response);
+
+						auto responseBody = json::value::object();
+						responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+						http_response response(status_codes::BadRequest);
+						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						response.set_body(responseBody);
+
+						message.reply(response);
 					}
 					catch (const std::exception ex)
 					{
-						message.reply(status_codes::BadRequest);
+						http_response response(status_codes::BadRequest);
+						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						message.reply(response);
 					}
 					catch (...)
 					{
-						message.reply(status_codes::BadRequest);
+						http_response response(status_codes::BadRequest);
+						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						message.reply(response);
 					}
 
 				});
@@ -164,63 +210,90 @@ void MicroserviceController::handlePost(http_request message)
 		}
 		else if (path[0] == U("locations") && path[1] == U("update"))
 		{
-			message.extract_json().then([=](json::value request) {
+			message.extract_json().then([=](json::value requestBody) {
 				try
 				{
 					Location updateLocation;
-					if (request.has_field(U("Location_id"))) {
-						updateLocation.id = request[U("Location_id")].as_integer();
+					if (requestBody.has_field(U("Location_id"))) {
+						updateLocation.id = requestBody[U("Location_id")].as_integer();
 
 
-						if (request.has_field(U("Location_name")))
-							updateLocation.name = toString(request[U("Location_name")].as_string().c_str());
+						if (requestBody.has_field(U("Location_name")))
+							updateLocation.name = toString(requestBody[U("Location_name")].as_string().c_str());
 
-						if (request.has_field(U("Location_address")))
-							updateLocation.address = toString(request[U("Location_address")].as_string().c_str());
+						if (requestBody.has_field(U("Location_address")))
+							updateLocation.address = toString(requestBody[U("Location_address")].as_string().c_str());
 
-						if (request.has_field(U("Location_city")))
-							updateLocation.city = toString(request[U("Location_city")].as_string().c_str());
+						if (requestBody.has_field(U("Location_city")))
+							updateLocation.city = toString(requestBody[U("Location_city")].as_string().c_str());
 
-						if (request.has_field(U("Location_zip")))
-							updateLocation.zip = request[U("Location_zip")].as_integer();
+						if (requestBody.has_field(U("Location_zip")))
+							updateLocation.zip = requestBody[U("Location_zip")].as_integer();
 
-						if (request.has_field(U("Location_country")))
-							updateLocation.country = toString(request[U("Location_country")].as_string().c_str());
+						if (requestBody.has_field(U("Location_country")))
+							updateLocation.country = toString(requestBody[U("Location_country")].as_string().c_str());
 
 						if (dao.updateDB(updateLocation)) {
-							auto response = json::value::object();
-							response[U("Success")] = json::value::string(U("Update successful"));
-							message.reply(status_codes::OK, response);
+							auto responseBody = json::value::object();
+							responseBody[U("Success")] = json::value::string(U("Update successful"));
+
+							http_response response(status_codes::OK);
+							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							response.set_body(responseBody);
+
+							message.reply(response);
 						}
 						else
 						{
-							auto response = json::value::object();
-							response[U("Fail")] = json::value::string(U("Update successful"));
-							message.reply(status_codes::InternalError);
+							auto responseBody = json::value::object();
+							responseBody[U("Fail")] = json::value::string(U("Update successful"));
+
+							http_response response(status_codes::OK);
+							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							response.set_body(responseBody);
+
+							message.reply(response);
 						}
 					}
 					else
 					{
 
-						auto response = json::value::object();
-						response[U("error")] = json::value::string(U("Update failed, please check your parameters"));
-						message.reply(status_codes::BadRequest, response);
+						auto responseBody = json::value::object();
+						responseBody[U("error")] = json::value::string(U("Update failed, please check your parameters"));
+
+						http_response response(status_codes::OK);
+						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						response.set_body(responseBody);
+
+						message.reply(response);
 					}
 				}
 				catch (const json::json_exception & e)
 				{
 					std::cout << "exception: " << e.what() << std::endl;
-					auto response = json::value::object();
-					response[U("error")] = json::value::string(U("Invalid JSON"));
-					message.reply(status_codes::BadRequest, response);
+					auto responseBody = json::value::object();
+					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					response.set_body(responseBody);
+
+					message.reply(response);
 				}
 				catch (const std::exception ex)
 				{
-					message.reply(status_codes::BadRequest);
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+			
+					message.reply(response);
 				}
 				catch (...)
 				{
-					message.reply(status_codes::BadRequest);
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+
+					message.reply(response);
 				}
 
 			});
@@ -230,63 +303,82 @@ void MicroserviceController::handlePost(http_request message)
 
 			
 			
-			auto searchDB = message.extract_json().then([=](json::value request)
+			auto searchDB = message.extract_json().then([=](json::value requestBody)
 			{
 				try
 				{
 					Location searchLocation;
-					if (request.has_field(U("Location_id")))
-						searchLocation.id = request[U("Location_id")].as_integer();
+					if (requestBody.has_field(U("Location_id")))
+						searchLocation.id = requestBody[U("Location_id")].as_integer();
 
-					if (request.has_field(U("Location_name")))
-						searchLocation.name = toString(request[U("Location_name")].as_string().c_str());
+					if (requestBody.has_field(U("Location_name")))
+						searchLocation.name = toString(requestBody[U("Location_name")].as_string().c_str());
 
-					if (request.has_field(U("Location_address")))
-						searchLocation.address = toString(request[U("Location_address")].as_string().c_str());
+					if (requestBody.has_field(U("Location_address")))
+						searchLocation.address = toString(requestBody[U("Location_address")].as_string().c_str());
 
-					if (request.has_field(U("Location_city")))
-						searchLocation.city = toString(request[U("Location_city")].as_string().c_str());
+					if (requestBody.has_field(U("Location_city")))
+						searchLocation.city = toString(requestBody[U("Location_city")].as_string().c_str());
 
-					if (request.has_field(U("Location_zip")))
-						searchLocation.zip = request[U("Location_zip")].as_integer();
+					if (requestBody.has_field(U("Location_zip")))
+						searchLocation.zip = requestBody[U("Location_zip")].as_integer();
 
-					if (request.has_field(U("Location_country")))
-						searchLocation.country = toString(request[U("Location_country")].as_string().c_str());
+					if (requestBody.has_field(U("Location_country")))
+						searchLocation.country = toString(requestBody[U("Location_country")].as_string().c_str());
 
 					std::vector<Location> responseVec = dao.getByValue(searchLocation);
-					json::value response;
+					json::value responseBody;
 					int i = 0;
 
 					for (Location& l : responseVec)
 					{
-						auto responsePart = json::value::object();
-						responsePart[U("Location_id")] = json::value::number(l.id);
-						responsePart[U("Location_name")] = json::value::string(utility::conversions::to_string_t(l.name));
-						responsePart[U("Location_address")] = json::value::string(utility::conversions::to_string_t(l.address));
-						responsePart[U("Location_city")] = json::value::string(utility::conversions::to_string_t(l.city));
-						responsePart[U("Location_zip")] = json::value::number(l.zip);
-						responsePart[U("Location_country")] = json::value::string(utility::conversions::to_string_t(l.country));
+						auto responseBodyPart = json::value::object();
+						responseBodyPart[U("Location_id")] = json::value::number(l.id);
+						responseBodyPart[U("Location_name")] = json::value::string(utility::conversions::to_string_t(l.name));
+						responseBodyPart[U("Location_address")] = json::value::string(utility::conversions::to_string_t(l.address));
+						responseBodyPart[U("Location_city")] = json::value::string(utility::conversions::to_string_t(l.city));
+						responseBodyPart[U("Location_zip")] = json::value::number(l.zip);
+						responseBodyPart[U("Location_country")] = json::value::string(utility::conversions::to_string_t(l.country));
 
-						response[i] = responsePart;
+						responseBody[i] = responseBodyPart;
 						i++;
 					}
-					message.reply(status_codes::OK, response);
+
+					http_response response(status_codes::OK);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					response.set_body(responseBody);
+
+					message.reply(response);
 
 				}
 				catch (const json::json_exception & e)
 				{
 					std::cout << "exception: " << e.what() << std::endl;
-					auto response = json::value::object();
-					response[U("error")] = json::value::string(U("Invalid JSON"));
-					message.reply(status_codes::BadRequest, response);
+
+					auto responseBody = json::value::object();
+					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					response.set_body(responseBody);
+
+					message.reply(response);
 				}
 				catch (const std::exception ex)
 				{
-					message.reply(status_codes::BadRequest);
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+				
+					message.reply(response);
 				}
 				catch (...)
 				{
-					message.reply(status_codes::BadRequest);
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					
+					message.reply(response);
 				}
 
 			});
@@ -303,7 +395,11 @@ void MicroserviceController::handlePost(http_request message)
 	}
 	else
 	{
-		message.reply(status_codes::NotFound);
+
+		http_response response(status_codes::NotFound);
+		response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+
+		message.reply(response);
 	}
 
 }
@@ -315,67 +411,95 @@ void MicroserviceController::handleDelete(http_request message) {
 	{
 		if (path[0] == U("locations") && path[1] == U("delete")) 
 		{
-			auto deleteRow =  message.extract_json().then([=](json::value request) {
+			auto deleteRow =  message.extract_json().then([=](json::value requestBody) {
 				try
 				{
 				
 					Location deleteLocation;
 
-					if (request.has_field(U("Location_id"))) {
-						deleteLocation.id = request[U("Location_id")].as_integer();
+					if (requestBody.has_field(U("Location_id"))) {
+						deleteLocation.id = requestBody[U("Location_id")].as_integer();
 
 
-						if (request.has_field(U("Location_name")))
-							deleteLocation.name = toString(request[U("Location_name")].as_string().c_str());
+						if (requestBody.has_field(U("Location_name")))
+							deleteLocation.name = toString(requestBody[U("Location_name")].as_string().c_str());
 
 
-						if (request.has_field(U("Location_address")))
-							deleteLocation.address = toString(request[U("Location_address")].as_string().c_str());
+						if (requestBody.has_field(U("Location_address")))
+							deleteLocation.address = toString(requestBody[U("Location_address")].as_string().c_str());
 
-						if (request.has_field(U("Location_city")))
-							deleteLocation.city = toString(request[U("Location_city")].as_string().c_str());
+						if (requestBody.has_field(U("Location_city")))
+							deleteLocation.city = toString(requestBody[U("Location_city")].as_string().c_str());
 
-						if (request.has_field(U("Location_zip")))
-							deleteLocation.zip = request[U("Location_zip")].as_integer();
+						if (requestBody.has_field(U("Location_zip")))
+							deleteLocation.zip = requestBody[U("Location_zip")].as_integer();
 
-						if (request.has_field(U("Location_country")))
-							deleteLocation.country = toString(request[U("Location_country")].as_string().c_str());
+						if (requestBody.has_field(U("Location_country")))
+							deleteLocation.country = toString(requestBody[U("Location_country")].as_string().c_str());
 
 						if (dao.deleteRow(deleteLocation))
 						{
-							auto response = json::value::object();
-							response[U("Success")] = json::value::string(U("Deletion successful"));
-							message.reply(status_codes::OK,response);
+							auto responseBody = json::value::object();
+							responseBody[U("Success")] = json::value::string(U("Deletion successful"));
+
+							http_response response(status_codes::OK);
+							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							response.set_body(responseBody);
+
+							message.reply(response);
 						}
 						else
 						{
-							auto response = json::value::object();
-							response[U("Fail")] = json::value::string(U("Deletion failed, please check your parameters"));
-							message.reply(status_codes::OK, response);
+							auto responseBody = json::value::object();
+							responseBody[U("Fail")] = json::value::string(U("Deletion failed, please check your parameters"));
+
+							http_response response(status_codes::OK);
+							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							response.set_body(responseBody);
+
+							message.reply(response);
 						}
 					}
 					else
 					{
-						auto response = json::value::object();
-						response[U("error")] = json::value::string(U("Invalid JSON"));
-						message.reply(status_codes::BadRequest, response);
+						auto responseBody = json::value::object();
+						responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+						http_response response(status_codes::OK);
+						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						response.set_body(responseBody);
+
+						message.reply(response);
 
 					}
 				}
 				catch (const json::json_exception & e)
 				{
 					std::cout << "exception: " << e.what() << std::endl;
-					auto response = json::value::object();
-					response[U("error")] = json::value::string(U("Invalid JSON"));
-					message.reply(status_codes::BadRequest, response);
+					auto responseBody = json::value::object();
+					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					response.set_body(responseBody);
+
+					message.reply(response);
 				}
 				catch (const std::exception ex)
 				{
-					message.reply(status_codes::BadRequest);
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					
+					message.reply(response);
 				}
 				catch (...)
 				{
-					message.reply(status_codes::BadRequest);
+
+					http_response response(status_codes::BadRequest);
+					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+
+					message.reply(response);
 				}
 
 			});
@@ -391,34 +515,62 @@ void MicroserviceController::handleDelete(http_request message) {
 		}
 		else
 		{
-			message.reply(status_codes::NotFound);
+
+			http_response response(status_codes::NotFound);
+			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+
+			message.reply(response);
 		}
 	}
 	else
 	{
-		message.reply(status_codes::NotFound);
+
+		http_response response(status_codes::NotFound);
+		response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+
+		message.reply(response);
 	}
 	
 }
 
 void MicroserviceController::handleHead(http_request message) {
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::HEAD));
+	http_response response(status_codes::NotImplemented);
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.set_body(responseNotImpl(methods::HEAD));
+	message.reply(response);
+	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::HEAD));
 }
 
 void MicroserviceController::handleOptions(http_request message) {
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::OPTIONS));
+	http_response response(status_codes::NotImplemented);
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.set_body(responseNotImpl(methods::OPTIONS));
+	message.reply(response);
+	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::OPTIONS));
 }
 
 void MicroserviceController::handleTrace(http_request message) {
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::TRCE));
+	http_response response(status_codes::NotImplemented);
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.set_body(responseNotImpl(methods::TRCE));
+	message.reply(response);
+	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::TRCE));
 }
 
 void MicroserviceController::handleConnect(http_request message) {
+	http_response response(status_codes::NotImplemented);
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.set_body(responseNotImpl(methods::CONNECT));
+	message.reply(response);
 	message.reply(status_codes::NotImplemented, responseNotImpl(methods::CONNECT));
 }
 
 void MicroserviceController::handleMerge(http_request message) {
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::MERGE));
+	http_response response(status_codes::NotImplemented);
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.set_body(responseNotImpl(methods::MERGE));
+	message.reply(response);
+	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::MERGE));
 }
 
 json::value MicroserviceController::responseNotImpl(const http::method &method) {
@@ -437,6 +589,7 @@ json::value MicroserviceController::responseNotImpl(const http::method &method) 
 
 	return response;
 }
+
 std::string MicroserviceController::toString(const wchar_t* wc) {
 	std::wstring ws(wc);
 	std::string s(ws.begin(), ws.end());
