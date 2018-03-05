@@ -50,4 +50,6 @@ private:
 	static json::value responseNotImpl(const http::method &method);
 	static std::string toString(const wchar_t* wc);
 	Dao dao;
+	static void addHeaders(http_response& response);
+
 };

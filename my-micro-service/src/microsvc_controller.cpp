@@ -38,6 +38,10 @@ void MicroserviceController::initRestOpHandlers()
 	_listener.support(methods::POST, std::bind(&MicroserviceController::handlePost, this, std::placeholders::_1));
 	_listener.support(methods::DEL, std::bind(&MicroserviceController::handleDelete, this, std::placeholders::_1));
 	_listener.support(methods::PATCH, std::bind(&MicroserviceController::handlePatch, this, std::placeholders::_1));
+	_listener.support(methods::OPTIONS, std::bind(&MicroserviceController::handleOptions, this, std::placeholders::_1));
+	_listener.support(methods::CONNECT, std::bind(&MicroserviceController::handleConnect, this, std::placeholders::_1));
+	_listener.support(methods::HEAD, std::bind(&MicroserviceController::handleHead, this, std::placeholders::_1));
+	_listener.support(methods::TRCE, std::bind(&MicroserviceController::handleTrace, this, std::placeholders::_1));
 }
 
 void MicroserviceController::handleGet(http_request message) 
@@ -53,7 +57,7 @@ void MicroserviceController::handleGet(http_request message)
 			responseBody[U("response")] = json::value::string(U("Hello World!"));
 
 			http_response response(status_codes::OK);
-			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+			addHeaders(response);
 			response.set_body(responseBody);
 
 			message.reply(response);
@@ -81,7 +85,7 @@ void MicroserviceController::handleGet(http_request message)
 			}
 
 			http_response response(status_codes::OK);
-			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+			addHeaders(response);
 			response.set_body(responseBody);
 
 			message.reply(response);
@@ -93,7 +97,7 @@ void MicroserviceController::handleGet(http_request message)
 		else 
 		{
 			http_response response(status_codes::NotFound);
-			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+			addHeaders(response);
 
 			message.reply(response);
 		}
@@ -101,7 +105,7 @@ void MicroserviceController::handleGet(http_request message)
 	else 
 	{
 		http_response response(status_codes::NotFound);
-		response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+		addHeaders(response);
 	
 		message.reply(response);
 	
@@ -110,7 +114,7 @@ void MicroserviceController::handleGet(http_request message)
 void MicroserviceController::handlePatch(http_request message) 
 {
 	http_response response(status_codes::NotImplemented);
-	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	addHeaders(response);
 	response.set_body(responseNotImpl(methods::PATCH));
 	message.reply(response);
 }
@@ -119,7 +123,7 @@ void MicroserviceController::handlePut(http_request message)
 {
 
 	http_response response(status_codes::NotImplemented);
-	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	addHeaders(response);
 	response.set_body(responseNotImpl(methods::PUT));
 	message.reply(response);
 }
@@ -157,10 +161,10 @@ void MicroserviceController::handlePost(http_request message)
 						if (dao.insertIntoDB(newLocation)) {
 
 							auto responseBody = json::value::object();
-							responseBody[U("Success")] = json::value::string(U("Adding item successful"));
+							responseBody[U("Results")] = json::value::string(U("Adding item successful"));
 
 							http_response response(status_codes::OK);
-							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							addHeaders(response);
 							response.set_body(responseBody);
 
 							message.reply(response);
@@ -169,10 +173,10 @@ void MicroserviceController::handlePost(http_request message)
 						else
 						{
 							auto responseBody = json::value::object();
-							responseBody[U("Fail")] = json::value::string(U("Addint item failed, please check your parameters"));
+							responseBody[U("Results")] = json::value::string(U("Addint item failed, please check your parameters"));
 
 							http_response response(status_codes::OK);
-							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							addHeaders(response);
 							response.set_body(responseBody);
 
 							message.reply(response);
@@ -186,7 +190,7 @@ void MicroserviceController::handlePost(http_request message)
 						responseBody[U("error")] = json::value::string(U("Invalid JSON"));
 
 						http_response response(status_codes::BadRequest);
-						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						addHeaders(response);
 						response.set_body(responseBody);
 
 						message.reply(response);
@@ -194,13 +198,13 @@ void MicroserviceController::handlePost(http_request message)
 					catch (const std::exception ex)
 					{
 						http_response response(status_codes::BadRequest);
-						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						addHeaders(response);
 						message.reply(response);
 					}
 					catch (...)
 					{
 						http_response response(status_codes::BadRequest);
-						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						addHeaders(response);
 						message.reply(response);
 					}
 
@@ -235,10 +239,10 @@ void MicroserviceController::handlePost(http_request message)
 
 						if (dao.updateDB(updateLocation)) {
 							auto responseBody = json::value::object();
-							responseBody[U("Success")] = json::value::string(U("Update successful"));
+							responseBody[U("Results")] = json::value::string(U("Update successful"));
 
 							http_response response(status_codes::OK);
-							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							addHeaders(response);
 							response.set_body(responseBody);
 
 							message.reply(response);
@@ -246,10 +250,10 @@ void MicroserviceController::handlePost(http_request message)
 						else
 						{
 							auto responseBody = json::value::object();
-							responseBody[U("Fail")] = json::value::string(U("Update successful"));
+							responseBody[U("Results")] = json::value::string(U("Update failed"));
 
 							http_response response(status_codes::OK);
-							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							addHeaders(response);
 							response.set_body(responseBody);
 
 							message.reply(response);
@@ -259,10 +263,10 @@ void MicroserviceController::handlePost(http_request message)
 					{
 
 						auto responseBody = json::value::object();
-						responseBody[U("error")] = json::value::string(U("Update failed, please check your parameters"));
+						responseBody[U("Results")] = json::value::string(U("Update failed, please check your parameters"));
 
 						http_response response(status_codes::OK);
-						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						addHeaders(response);
 						response.set_body(responseBody);
 
 						message.reply(response);
@@ -275,7 +279,7 @@ void MicroserviceController::handlePost(http_request message)
 					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 					response.set_body(responseBody);
 
 					message.reply(response);
@@ -284,14 +288,14 @@ void MicroserviceController::handlePost(http_request message)
 				{
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 			
 					message.reply(response);
 				}
 				catch (...)
 				{
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 
 					message.reply(response);
 				}
@@ -345,7 +349,7 @@ void MicroserviceController::handlePost(http_request message)
 					}
 
 					http_response response(status_codes::OK);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 					response.set_body(responseBody);
 
 					message.reply(response);
@@ -359,7 +363,7 @@ void MicroserviceController::handlePost(http_request message)
 					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 					response.set_body(responseBody);
 
 					message.reply(response);
@@ -368,7 +372,7 @@ void MicroserviceController::handlePost(http_request message)
 				{
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 				
 					message.reply(response);
 				}
@@ -376,7 +380,7 @@ void MicroserviceController::handlePost(http_request message)
 				{
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 					
 					message.reply(response);
 				}
@@ -397,7 +401,7 @@ void MicroserviceController::handlePost(http_request message)
 	{
 
 		http_response response(status_codes::NotFound);
-		response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+		addHeaders(response);
 
 		message.reply(response);
 	}
@@ -440,10 +444,10 @@ void MicroserviceController::handleDelete(http_request message) {
 						if (dao.deleteRow(deleteLocation))
 						{
 							auto responseBody = json::value::object();
-							responseBody[U("Success")] = json::value::string(U("Deletion successful"));
+							responseBody[U("Results")] = json::value::string(U("Deletion successful"));
 
 							http_response response(status_codes::OK);
-							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							addHeaders(response);
 							response.set_body(responseBody);
 
 							message.reply(response);
@@ -451,10 +455,10 @@ void MicroserviceController::handleDelete(http_request message) {
 						else
 						{
 							auto responseBody = json::value::object();
-							responseBody[U("Fail")] = json::value::string(U("Deletion failed, please check your parameters"));
+							responseBody[U("Results")] = json::value::string(U("Deletion failed, please check your parameters"));
 
 							http_response response(status_codes::OK);
-							response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+							addHeaders(response);
 							response.set_body(responseBody);
 
 							message.reply(response);
@@ -463,10 +467,10 @@ void MicroserviceController::handleDelete(http_request message) {
 					else
 					{
 						auto responseBody = json::value::object();
-						responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+						responseBody[U("Results")] = json::value::string(U("Invalid JSON"));
 
 						http_response response(status_codes::OK);
-						response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+						addHeaders(response);
 						response.set_body(responseBody);
 
 						message.reply(response);
@@ -480,7 +484,7 @@ void MicroserviceController::handleDelete(http_request message) {
 					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 					response.set_body(responseBody);
 
 					message.reply(response);
@@ -489,35 +493,35 @@ void MicroserviceController::handleDelete(http_request message) {
 				{
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
-					
+					addHeaders(response);
+
 					message.reply(response);
 				}
 				catch (...)
 				{
 
 					http_response response(status_codes::BadRequest);
-					response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+					addHeaders(response);
 
 					message.reply(response);
 				}
 
 			});
-			try 
+			try
 			{
 				deleteRow.get();
 			}
-			catch (std::exception & e) 
+			catch (std::exception & e)
 			{
 				std::cout << "exception: " << e.what() << std::endl;
-				
+
 			}
 		}
 		else
 		{
 
 			http_response response(status_codes::NotFound);
-			response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+			addHeaders(response);
 
 			message.reply(response);
 		}
@@ -526,32 +530,32 @@ void MicroserviceController::handleDelete(http_request message) {
 	{
 
 		http_response response(status_codes::NotFound);
-		response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+		addHeaders(response);
 
 		message.reply(response);
 	}
-	
+
 }
 
 void MicroserviceController::handleHead(http_request message) {
 	http_response response(status_codes::NotImplemented);
-	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	addHeaders(response);
 	response.set_body(responseNotImpl(methods::HEAD));
 	message.reply(response);
 	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::HEAD));
 }
 
 void MicroserviceController::handleOptions(http_request message) {
-	http_response response(status_codes::NotImplemented);
-	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
-	response.set_body(responseNotImpl(methods::OPTIONS));
+	http_response response(status_codes::OK);
+	addHeaders(response);
+
 	message.reply(response);
 	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::OPTIONS));
 }
 
 void MicroserviceController::handleTrace(http_request message) {
 	http_response response(status_codes::NotImplemented);
-	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	addHeaders(response);
 	response.set_body(responseNotImpl(methods::TRCE));
 	message.reply(response);
 	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::TRCE));
@@ -559,15 +563,15 @@ void MicroserviceController::handleTrace(http_request message) {
 
 void MicroserviceController::handleConnect(http_request message) {
 	http_response response(status_codes::NotImplemented);
-	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	addHeaders(response);
 	response.set_body(responseNotImpl(methods::CONNECT));
 	message.reply(response);
-	message.reply(status_codes::NotImplemented, responseNotImpl(methods::CONNECT));
+	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::CONNECT));
 }
 
 void MicroserviceController::handleMerge(http_request message) {
 	http_response response(status_codes::NotImplemented);
-	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	addHeaders(response);
 	response.set_body(responseNotImpl(methods::MERGE));
 	message.reply(response);
 	//message.reply(status_codes::NotImplemented, responseNotImpl(methods::MERGE));
@@ -594,4 +598,9 @@ std::string MicroserviceController::toString(const wchar_t* wc) {
 	std::wstring ws(wc);
 	std::string s(ws.begin(), ws.end());
 	return s;
+}
+void MicroserviceController::addHeaders(http_response& response) {
+	response.headers().add(U("Access-Control-Allow-Origin"), U("*"));
+	response.headers().add(U("Access-Control-Allow-Headers"), U("Content-Type"));
+	response.headers().add(U("Access-Control-Allow-Methods"), U("GET,POST,DELETE,OPTIONS"));
 }
