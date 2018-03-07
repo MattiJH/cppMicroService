@@ -2,7 +2,9 @@
 #pragma once
 #include<string>
 #include <codecvt>
-struct Location {
+#include "dbTable.h"
+
+struct Location : DBTable {
 
 	Location();
 	int id;
@@ -12,7 +14,7 @@ struct Location {
 	int zip;
 	std::string country;
 
-	std::string getInsertValues();
-	std::string getSearchValue();
+	std::string getInsertValues() override;
+	std::string getSearchValue() override;
 
 };

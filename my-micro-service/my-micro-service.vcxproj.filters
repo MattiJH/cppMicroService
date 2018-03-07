@@ -36,6 +36,9 @@
     <ClCompile Include="src\location.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\songs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\microsvc_controller.hpp">
@@ -63,6 +66,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\location.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dbTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\songs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

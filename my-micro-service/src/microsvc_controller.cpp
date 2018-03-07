@@ -65,7 +65,7 @@ void MicroserviceController::handleGet(http_request message)
 		}
 		else if (path[0] == U("locations") && path[1] == U("all")) 
 		{
-			std::vector<Location> responseVec = dao.getAllFromDB();
+			std::vector<Location> responseVec = dao.getAllFromLocations();
 			json::value responseBody;
 			
 			int i = 0;
@@ -93,7 +93,37 @@ void MicroserviceController::handleGet(http_request message)
 
 
 		}
-		
+		else if (path[0] == U("songs") && path[1] == U("all"))
+		{
+			std::vector<Songs> responseVec = dao.getAllFromSongs();
+			json::value responseBody;
+
+			int i = 0;
+
+			for (Songs& l : responseVec)
+			{
+				auto responseBodyPart = json::value::object();
+				responseBodyPart[U("song_id")] = json::value::number(l.song_id);
+				responseBodyPart[U("song_name")] = json::value::string(utility::conversions::to_string_t(l.song_name));
+				responseBodyPart[U("artist")] = json::value::string(utility::conversions::to_string_t(l.artist));
+				responseBodyPart[U("album")] = json::value::string(utility::conversions::to_string_t(l.album));
+				responseBodyPart[U("lenght")] = json::value::string(utility::conversions::to_string_t(l.length));
+				responseBodyPart[U("year")] = json::value::string(utility::conversions::to_string_t(l.year));
+				responseBodyPart[U("lyrics")] = json::value::string(utility::conversions::to_string_t(l.lyrics));
+
+				responseBody[i] = responseBodyPart;
+				i++;
+			}
+
+			http_response response(status_codes::OK);
+			addHeaders(response);
+			response.set_body(responseBody);
+
+			message.reply(response);
+
+
+
+		}
 		else 
 		{
 			http_response response(status_codes::NotFound);
@@ -212,6 +242,87 @@ void MicroserviceController::handlePost(http_request message)
 			
 		
 		}
+		if (path[0] == U("songs") && path[1] == U("add"))
+		{
+
+			message.extract_json().then([=](json::value request)
+			{
+				try
+				{
+					Songs newSong;
+
+					if (request.has_field(U("song_name")))
+						newSong.song_name = toString(request[U("song_name")].as_string().c_str());
+
+					if (request.has_field(U("artist")))
+						newSong.artist = toString(request[U("artist")].as_string().c_str());
+
+					if (request.has_field(U("album")))
+						newSong.album = toString(request[U("album")].as_string().c_str());
+
+					if (request.has_field(U("lenght")))
+						newSong.length = toString(request[U("lenght")].as_string().c_str());
+
+					if (request.has_field(U("year")))
+						newSong.year = toString(request[U("year")].as_string().c_str());
+
+					if (request.has_field(U("lyrics")))
+						newSong.lyrics = toString(request[U("lyrics")].as_string().c_str());
+
+					if (dao.insertIntoDB(newSong)) {
+
+						auto responseBody = json::value::object();
+						responseBody[U("Results")] = json::value::string(U("Adding item successful"));
+
+						http_response response(status_codes::OK);
+						addHeaders(response);
+						response.set_body(responseBody);
+
+						message.reply(response);
+
+					}
+					else
+					{
+						auto responseBody = json::value::object();
+						responseBody[U("Results")] = json::value::string(U("Addint item failed, please check your parameters"));
+
+						http_response response(status_codes::OK);
+						addHeaders(response);
+						response.set_body(responseBody);
+
+						message.reply(response);
+					}
+				}
+				catch (const json::json_exception & e)
+				{
+					std::cout << "exception: " << e.what() << std::endl;
+
+					auto responseBody = json::value::object();
+					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+					response.set_body(responseBody);
+
+					message.reply(response);
+				}
+				catch (const std::exception ex)
+				{
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+					message.reply(response);
+				}
+				catch (...)
+				{
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+					message.reply(response);
+				}
+
+			});
+
+
+		}
 		else if (path[0] == U("locations") && path[1] == U("update"))
 		{
 			message.extract_json().then([=](json::value requestBody) {
@@ -289,7 +400,7 @@ void MicroserviceController::handlePost(http_request message)
 
 					http_response response(status_codes::BadRequest);
 					addHeaders(response);
-			
+
 					message.reply(response);
 				}
 				catch (...)
@@ -301,6 +412,102 @@ void MicroserviceController::handlePost(http_request message)
 				}
 
 			});
+
+
+		}
+		else if (path[0] == U("songs") && path[1] == U("update"))
+		{
+			message.extract_json().then([=](json::value requestBody) {
+				try
+				{
+					Songs updateSong;
+					if (requestBody.has_field(U("song_id"))) {
+						updateSong.song_id = requestBody[U("song_id")].as_integer();
+
+
+						if (requestBody.has_field(U("song_name")))
+							updateSong.song_name = toString(requestBody[U("song_name")].as_string().c_str());
+
+						if (requestBody.has_field(U("artist")))
+							updateSong.artist = toString(requestBody[U("artist")].as_string().c_str());
+
+						if (requestBody.has_field(U("album")))
+							updateSong.album = toString(requestBody[U("album")].as_string().c_str());
+
+						if (requestBody.has_field(U("lenght")))
+							updateSong.length = toString(requestBody[U("lenght")].as_string().c_str());
+
+						if (requestBody.has_field(U("year")))
+							updateSong.year = toString(requestBody[U("year")].as_string().c_str());
+
+						if (requestBody.has_field(U("lyrics")))
+							updateSong.lyrics = toString(requestBody[U("lyrics")].as_string().c_str());
+
+						if (dao.updateDB(updateSong)) {
+							auto responseBody = json::value::object();
+							responseBody[U("Results")] = json::value::string(U("Update successful"));
+
+							http_response response(status_codes::OK);
+							addHeaders(response);
+							response.set_body(responseBody);
+
+							message.reply(response);
+						}
+						else
+						{
+							auto responseBody = json::value::object();
+							responseBody[U("Results")] = json::value::string(U("Update failed"));
+
+							http_response response(status_codes::OK);
+							addHeaders(response);
+							response.set_body(responseBody);
+
+							message.reply(response);
+						}
+					}
+					else
+					{
+
+						auto responseBody = json::value::object();
+						responseBody[U("Results")] = json::value::string(U("Update failed, please check your parameters"));
+
+						http_response response(status_codes::OK);
+						addHeaders(response);
+						response.set_body(responseBody);
+
+						message.reply(response);
+					}
+				}
+				catch (const json::json_exception & e)
+				{
+					std::cout << "exception: " << e.what() << std::endl;
+					auto responseBody = json::value::object();
+					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+					response.set_body(responseBody);
+
+					message.reply(response);
+				}
+				catch (const std::exception ex)
+				{
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+
+					message.reply(response);
+				}
+				catch (...)
+				{
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+
+					message.reply(response);
+				}
+
+			});
+
 
 		}
 		else if (path[0] == U("locations") && path[1] == U("search")) {
@@ -396,6 +603,102 @@ void MicroserviceController::handlePost(http_request message)
 			}
 		
 		}
+	
+		else if (path[0] == U("songs") && path[1] == U("search")) {
+
+			auto searchDB = message.extract_json().then([=](json::value requestBody)
+			{
+				try
+				{
+					Songs searchSong;
+					if (requestBody.has_field(U("song_id")))
+						searchSong.song_id = requestBody[U("song_id")].as_integer();
+
+					if (requestBody.has_field(U("song_name")))
+						searchSong.song_name = toString(requestBody[U("song_name")].as_string().c_str());
+
+					if (requestBody.has_field(U("artist")))
+						searchSong.artist = toString(requestBody[U("artist")].as_string().c_str());
+
+					if (requestBody.has_field(U("album")))
+						searchSong.album = toString(requestBody[U("album")].as_string().c_str());
+
+					if (requestBody.has_field(U("lenght")))
+						searchSong.length = toString(requestBody[U("lenght")].as_string().c_str());
+
+					if (requestBody.has_field(U("year")))
+						searchSong.year = toString(requestBody[U("year")].as_string().c_str());
+
+					if (requestBody.has_field(U("lyrics")))
+						searchSong.lyrics = toString(requestBody[U("lyrics")].as_string().c_str());
+
+					std::vector<Songs> responseVec = dao.getByValue(searchSong);
+					json::value responseBody;
+					int i = 0;
+
+					for (Songs& l : responseVec)
+					{
+						auto responseBodyPart = json::value::object();
+						responseBodyPart[U("song_id")] = json::value::number(l.song_id);
+						responseBodyPart[U("song_name")] = json::value::string(utility::conversions::to_string_t(l.song_name));
+						responseBodyPart[U("artist")] = json::value::string(utility::conversions::to_string_t(l.artist));
+						responseBodyPart[U("album")] = json::value::string(utility::conversions::to_string_t(l.album));
+						responseBodyPart[U("lenght")] = json::value::string(utility::conversions::to_string_t(l.length));
+						responseBodyPart[U("year")] = json::value::string(utility::conversions::to_string_t(l.year));
+						responseBodyPart[U("lyrics")] = json::value::string(utility::conversions::to_string_t(l.lyrics));
+
+						responseBody[i] = responseBodyPart;
+						i++;
+					}
+
+					http_response response(status_codes::OK);
+					addHeaders(response);
+					response.set_body(responseBody);
+
+					message.reply(response);
+
+				}
+				catch (const json::json_exception & e)
+				{
+					std::cout << "exception: " << e.what() << std::endl;
+
+					auto responseBody = json::value::object();
+					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+					response.set_body(responseBody);
+
+					message.reply(response);
+				}
+				catch (const std::exception ex)
+				{
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+
+					message.reply(response);
+				}
+				catch (...)
+				{
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+
+					message.reply(response);
+				}
+
+			});
+			try
+			{
+				searchDB.get();
+			}
+			catch (std::exception & e)
+			{
+				std::cout << e.what() << std::endl;
+			}
+
+		}
 	}
 	else
 	{
@@ -442,6 +745,113 @@ void MicroserviceController::handleDelete(http_request message) {
 							deleteLocation.country = toString(requestBody[U("Location_country")].as_string().c_str());
 
 						if (dao.deleteRow(deleteLocation))
+						{
+							auto responseBody = json::value::object();
+							responseBody[U("Results")] = json::value::string(U("Deletion successful"));
+
+							http_response response(status_codes::OK);
+							addHeaders(response);
+							response.set_body(responseBody);
+
+							message.reply(response);
+						}
+						else
+						{
+							auto responseBody = json::value::object();
+							responseBody[U("Results")] = json::value::string(U("Deletion failed, please check your parameters"));
+
+							http_response response(status_codes::OK);
+							addHeaders(response);
+							response.set_body(responseBody);
+
+							message.reply(response);
+						}
+					}
+					else
+					{
+						auto responseBody = json::value::object();
+						responseBody[U("Results")] = json::value::string(U("Invalid JSON"));
+
+						http_response response(status_codes::OK);
+						addHeaders(response);
+						response.set_body(responseBody);
+
+						message.reply(response);
+
+					}
+				}
+				catch (const json::json_exception & e)
+				{
+					std::cout << "exception: " << e.what() << std::endl;
+					auto responseBody = json::value::object();
+					responseBody[U("error")] = json::value::string(U("Invalid JSON"));
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+					response.set_body(responseBody);
+
+					message.reply(response);
+				}
+				catch (const std::exception ex)
+				{
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+
+					message.reply(response);
+				}
+				catch (...)
+				{
+
+					http_response response(status_codes::BadRequest);
+					addHeaders(response);
+
+					message.reply(response);
+				}
+
+			});
+			try
+			{
+				deleteRow.get();
+			}
+			catch (std::exception & e)
+			{
+				std::cout << "exception: " << e.what() << std::endl;
+
+			}
+		}
+		if (path[0] == U("songs") && path[1] == U("delete"))
+		{
+			auto deleteRow = message.extract_json().then([=](json::value requestBody) {
+				try
+				{
+
+					Songs deleteSong;
+
+					Songs updateSong;
+					if (requestBody.has_field(U("song_id"))) {
+						deleteSong.song_id = requestBody[U("song_id")].as_integer();
+
+
+						if (requestBody.has_field(U("song_name")))
+							deleteSong.song_name = toString(requestBody[U("song_name")].as_string().c_str());
+
+						if (requestBody.has_field(U("artist")))
+							deleteSong.artist = toString(requestBody[U("artist")].as_string().c_str());
+
+						if (requestBody.has_field(U("album")))
+							deleteSong.album = toString(requestBody[U("album")].as_string().c_str());
+
+						if (requestBody.has_field(U("lenght")))
+							deleteSong.length = toString(requestBody[U("lenght")].as_string().c_str());
+
+						if (requestBody.has_field(U("year")))
+							deleteSong.year = toString(requestBody[U("year")].as_string().c_str());
+
+						if (requestBody.has_field(U("lyrics")))
+							deleteSong.lyrics = toString(requestBody[U("lyrics")].as_string().c_str());
+
+						if (dao.deleteRow(deleteSong))
 						{
 							auto responseBody = json::value::object();
 							responseBody[U("Results")] = json::value::string(U("Deletion successful"));

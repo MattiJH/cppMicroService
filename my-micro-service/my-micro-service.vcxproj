@@ -137,15 +137,18 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\microsvc_controller.cpp" />
     <ClCompile Include="src\network_utils.cpp" />
+    <ClCompile Include="src\songs.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\basic_controller.hpp" />
     <ClInclude Include="src\controller.hpp" />
     <ClInclude Include="src\dao.hpp" />
+    <ClInclude Include="src\dbTable.h" />
     <ClInclude Include="src\location.hpp" />
     <ClInclude Include="src\microsvc_controller.hpp" />
     <ClInclude Include="src\networks_utils.hpp" />
+    <ClInclude Include="src\songs.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\targetver.h" />
     <ClInclude Include="src\usr_interrupt_handler.hpp" />
