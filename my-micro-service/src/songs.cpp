@@ -25,7 +25,7 @@ std::string Songs::getSearchValue() {
 		helperValue += " song_id = " + std::to_string(song_id);
 	}
 
-	if (song_name != "")
+	if (song_name != "" && song_name != " ")
 	{
 		if (helperValue != "")
 		{
@@ -36,7 +36,7 @@ std::string Songs::getSearchValue() {
 
 	}
 
-	if (artist != "")
+	if (artist != "" && artist != " ")
 	{
 		if (helperValue != "")
 		{
@@ -46,7 +46,7 @@ std::string Songs::getSearchValue() {
 		helperValue += " artist = \"" + artist + '"';
 
 	}
-	if (album != "")
+	if (album != "" && album != " ")
 	{
 		if (helperValue != "")
 		{
@@ -56,17 +56,17 @@ std::string Songs::getSearchValue() {
 		helperValue += " album = \"" + album + '"';
 
 	}
-	if (length != "")
+	if (length != "" && length != " ")
 	{
 		if (helperValue != "")
 		{
 			helperValue += " AND ";
 		}
 
-		helperValue += " length = " + length;
+		helperValue += " length = \"" + length + '"';
 
 	}
-	if (year != "")
+	if (year != ""  && year != " ")
 	{
 		if (helperValue != "")
 		{
@@ -76,7 +76,7 @@ std::string Songs::getSearchValue() {
 		helperValue += " year = \"" + year + '"';
 
 	}
-	if (lyrics != "")
+/*	if (lyrics != ""  && lyrics  != " ")
 	{
 		if (helperValue != "")
 		{
@@ -86,7 +86,7 @@ std::string Songs::getSearchValue() {
 		helperValue += " lyrics = \"" + lyrics + '"';
 
 	}
-
+	*/
 
 	return helperValue;
 }

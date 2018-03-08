@@ -15,5 +15,5 @@ struct Songs : DBTable {
 	std::string getInsertValues() override;
 	std::string getSearchValue() override;
 	
-
+ 
 };

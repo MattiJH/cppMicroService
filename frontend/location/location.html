@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Open API</title>
+<script src="location.js"></script>
+</head>
+<body>
+    <form id="LocationInput" accept-charset="UTF-8"> 
+        ID:<br>
+        <input type="text" id="Location_id"><br>
+        Name:<br>
+        <input type="text" id="Location_name"><br>
+        Address:<br>
+        <input type="text" id="Location_address"><br>
+        City:<br>
+        <input type="text" id="Location_city"><br>
+        Zip:<br>
+        <input type="text" id="Location_zip"><br>
+        Country:<br>
+        <input type="text" id="Location_country"><br>
+    </form>
+    <br>
+    <button type="button" onclick="getAll()">getAll</button> <button type="button" onclick="search()">search</button>
+    <button type="button" onclick="insert()">insert</button> <button type="button" onclick="deleteData()">delete</button> 
+    <button type="button" onclick="update()">update</button>
+    <br>
+    <div id="restMessage"></div>
+    <br>
+    <div id="restResults"></div> 
+
+
+</body>
+</html>

@@ -828,7 +828,6 @@ void MicroserviceController::handleDelete(http_request message) {
 
 					Songs deleteSong;
 
-					Songs updateSong;
 					if (requestBody.has_field(U("song_id"))) {
 						deleteSong.song_id = requestBody[U("song_id")].as_integer();
 
