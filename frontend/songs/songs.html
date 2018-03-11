@@ -4,28 +4,32 @@
 <meta charset="utf-8" />
 <title>Open API</title>
 <script src="songs.js"></script>
+<link rel="stylesheet" type="text/css" href="songs.css">
 </head>
 <body>
-    <form id="SongsInput" accept-charset="UTF-8"> 
-        ID:<br>
-        <input type="text" id="song_id"><br>
-        Song name:<br>
-        <input type="text" id="song_name"><br>
-        Artist:<br>
-        <input type="text" id="artist"><br>
-        Album:<br>
-        <input type="text" id="album"><br>
-        Lenght:<br>
-        <input type="text" id="lenght"><br>
-        Year:<br>
-        <input type="text" id="year"><br>
-        Lyrics:<br>
-    <textarea id="lyrics"> </textarea><br> 
-    </form>
+    <h1>Song DB Interface</h1>
     <br>
-    <button type="button" onclick="getAll()">getAll</button> <button type="button" onclick="search()">search</button>
-    <button type="button" onclick="insert()">insert</button> <button type="button" onclick="deleteData()">delete</button> 
-    <button type="button" onclick="update()">update</button>
+    <form id="SongsInput" accept-charset="UTF-8"> 
+       <p>ID:</p>
+        <input type="text" id="song_id"><br>
+        <p>Song name:</p>
+        <input type="text" id="song_name"><br>
+        <p>Artist:</p>
+        <input type="text" id="artist"><br>
+        <p>Album:</p>
+        <input type="text" id="album"><br>
+        <p>Lenght:</p>
+        <input type="text" id="lenght"><br>
+        <p>Year:</p>
+        <input type="text" id="year"><br>
+        <p>Lyrics:</p>
+    <textarea id="lyrics"> </textarea><br> 
+ 
+    <br>
+    <input type="button" onclick="getAll()" value="getAll"> <input type="button" onclick="search()" value="search">
+    <input type="button" onclick="insert()" value= "insert"> <input type="button" onclick="deleteData()" value="delete">
+    <input type="button" onclick="update()" value="update">
+    </form>
     <br>
     <div id="restMessage"></div>
     <br>

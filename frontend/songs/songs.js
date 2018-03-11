@@ -160,7 +160,7 @@ function formatResponseMessage(arr){
 
 
 function formatResponse(arr) {
-    var out = "<table>"+
+    var out = "<table id=\"songs\">"+
     "<tr>"+
     "<th>Song id</th>"+
     "<th>Song Name</th>"+
