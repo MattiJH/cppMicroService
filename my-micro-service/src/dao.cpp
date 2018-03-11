@@ -260,17 +260,20 @@ std::vector<Songs> Dao::getByValue(Songs& search) {
 
 
 			while (query.executeStep()) {
+				
 				Songs add;
-				add.song_id = query.getColumn(0);
-				const char* name = query.getColumn(1);
+				add.song_id = query.getColumn("song_id");
+				const char* name = query.getColumn("song_name");
 				add.song_name = name;
-				const char* artist = query.getColumn(2);
+				const char* artist = query.getColumn("artist");
 				add.artist = artist;
-				const char* album = query.getColumn(3);
+				const char* album = query.getColumn("album");
 				add.album = album;
-				const char* year = query.getColumn(3);
+				const char* length = query.getColumn("length");
+				add.length = length;
+				const char* year = query.getColumn("year");
 				add.year = year;
-				const char* lyrics = query.getColumn(5);
+				const char* lyrics = query.getColumn("lyrics");
 				add.lyrics = lyrics;
 
 				results.push_back(add);

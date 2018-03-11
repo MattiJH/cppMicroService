@@ -15,8 +15,8 @@ function getFormData(){
     console.log("artist: "+artist);
     var album = document.getElementById("album").value;
     console.log("album: "+album);
-    var lenght = document.getElementById("lenght").value;
-    console.log("lenght: "+lenght);
+    var length = document.getElementById("lenght").value;
+    console.log("lenght: "+length);
     var year = document.getElementById("year").value;
     console.log("year: "+year);
     var lyrics = document.getElementById("lyrics").value;
@@ -34,7 +34,7 @@ function getFormData(){
         '"artist": "'+ artist+'",'+
         '"album": "'+ album+'",'+
         '"song_id":'+ song_id+','+
-        '"lenght": "'+ lenght+'",'+
+        '"length": "'+ length+'",'+
         '"lyrics": "'+ lyrics+'",'+
         '"year": "'+ year+'"}';
         return jsonAsText;
@@ -180,7 +180,7 @@ function formatResponse(arr) {
         "<td>"+arr[i].song_name+"</td>"+
         "<td>"+arr[i].artist +"</td>"+
         "<td>"+arr[i].album+"</td>"+
-        "<td>"+arr[i].lenght+"</td>"+
+        "<td>"+arr[i].length+"</td>"+
         "<td>"+arr[i].year+"</td>"+
         "<td>"+arr[i].lyrics+"</td>"+
         "</tr>"

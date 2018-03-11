@@ -107,7 +107,7 @@ void MicroserviceController::handleGet(http_request message)
 				responseBodyPart[U("song_name")] = json::value::string(utility::conversions::to_string_t(l.song_name));
 				responseBodyPart[U("artist")] = json::value::string(utility::conversions::to_string_t(l.artist));
 				responseBodyPart[U("album")] = json::value::string(utility::conversions::to_string_t(l.album));
-				responseBodyPart[U("lenght")] = json::value::string(utility::conversions::to_string_t(l.length));
+				responseBodyPart[U("length")] = json::value::string(utility::conversions::to_string_t(l.length));
 				responseBodyPart[U("year")] = json::value::string(utility::conversions::to_string_t(l.year));
 				responseBodyPart[U("lyrics")] = json::value::string(utility::conversions::to_string_t(l.lyrics));
 
@@ -260,8 +260,8 @@ void MicroserviceController::handlePost(http_request message)
 					if (request.has_field(U("album")))
 						newSong.album = toString(request[U("album")].as_string().c_str());
 
-					if (request.has_field(U("lenght")))
-						newSong.length = toString(request[U("lenght")].as_string().c_str());
+					if (request.has_field(U("length")))
+						newSong.length = toString(request[U("length")].as_string().c_str());
 
 					if (request.has_field(U("year")))
 						newSong.year = toString(request[U("year")].as_string().c_str());
@@ -434,8 +434,8 @@ void MicroserviceController::handlePost(http_request message)
 						if (requestBody.has_field(U("album")))
 							updateSong.album = toString(requestBody[U("album")].as_string().c_str());
 
-						if (requestBody.has_field(U("lenght")))
-							updateSong.length = toString(requestBody[U("lenght")].as_string().c_str());
+						if (requestBody.has_field(U("length")))
+							updateSong.length = toString(requestBody[U("length")].as_string().c_str());
 
 						if (requestBody.has_field(U("year")))
 							updateSong.year = toString(requestBody[U("year")].as_string().c_str());
@@ -623,8 +623,8 @@ void MicroserviceController::handlePost(http_request message)
 					if (requestBody.has_field(U("album")))
 						searchSong.album = toString(requestBody[U("album")].as_string().c_str());
 
-					if (requestBody.has_field(U("lenght")))
-						searchSong.length = toString(requestBody[U("lenght")].as_string().c_str());
+					if (requestBody.has_field(U("length")))
+						searchSong.length = toString(requestBody[U("length")].as_string().c_str());
 
 					if (requestBody.has_field(U("year")))
 						searchSong.year = toString(requestBody[U("year")].as_string().c_str());
@@ -643,7 +643,7 @@ void MicroserviceController::handlePost(http_request message)
 						responseBodyPart[U("song_name")] = json::value::string(utility::conversions::to_string_t(l.song_name));
 						responseBodyPart[U("artist")] = json::value::string(utility::conversions::to_string_t(l.artist));
 						responseBodyPart[U("album")] = json::value::string(utility::conversions::to_string_t(l.album));
-						responseBodyPart[U("lenght")] = json::value::string(utility::conversions::to_string_t(l.length));
+						responseBodyPart[U("length")] = json::value::string(utility::conversions::to_string_t(l.length));
 						responseBodyPart[U("year")] = json::value::string(utility::conversions::to_string_t(l.year));
 						responseBodyPart[U("lyrics")] = json::value::string(utility::conversions::to_string_t(l.lyrics));
 
@@ -841,8 +841,8 @@ void MicroserviceController::handleDelete(http_request message) {
 						if (requestBody.has_field(U("album")))
 							deleteSong.album = toString(requestBody[U("album")].as_string().c_str());
 
-						if (requestBody.has_field(U("lenght")))
-							deleteSong.length = toString(requestBody[U("lenght")].as_string().c_str());
+						if (requestBody.has_field(U("length")))
+							deleteSong.length = toString(requestBody[U("length")].as_string().c_str());
 
 						if (requestBody.has_field(U("year")))
 							deleteSong.year = toString(requestBody[U("year")].as_string().c_str());
