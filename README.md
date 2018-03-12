@@ -14,8 +14,8 @@ and windows visual studio 2017 project -version of the sample:
 
 METHOD | ADDRESS | INFO
 -------|---------|----
-GET    | api/service/test |Test rest address
-GET    | api/songs/all |Gets all the data from db
+GET    | api/service/test |Test rest interface
+GET    | api/songs/all |Gets all the data from DB
 POST   | api/songs/add |Adds data to the DB
 POST   | api/songs/update |Updates data in DB
 POST   | api/songs/search |Search data in DB
