@@ -1,6 +1,6 @@
 #pragma once
 #include "dbTable.h"
-
+//Mapping struct for Songs Table in the DB
 struct Songs : DBTable {
 
 	int song_id;

@@ -47,7 +47,7 @@ int main(int argc, const char * argv[]) {
 	try {
 		// wait for server initialization...
 		server.accept().wait();
-		std::wcout << U("Modern C++ Microservice now listening for requests at: ") << server.endpoint() << std::endl;
+		std::wcout << U("DIY server now listening for requests at: ") << server.endpoint() << std::endl;
 
 		cfx::InterruptHandler::waitForUserInterrupt();
 

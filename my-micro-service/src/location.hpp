@@ -4,6 +4,7 @@
 #include <codecvt>
 #include "dbTable.h"
 
+//Mapping struct for Location Table in the DB
 struct Location : DBTable {
 
 	Location();
